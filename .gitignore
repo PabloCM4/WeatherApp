@@ -1,4 +1,3 @@
 API_KEY.txt
 .vscode/
-WeatherService/build/
-WeatherService/build/**
+**/build/
