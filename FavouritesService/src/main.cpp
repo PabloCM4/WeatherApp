@@ -1,11 +1,13 @@
 #include <crow.h>
-#include "FavouritesService.h"
+#include "FavouritesService.hpp"
 #include <string>
 #include <unordered_set>
+#include <mongocxx/instance.hpp>
 
 int main()
 {
     crow::SimpleApp crow_app;
+    mongocxx::instance instance_; // This should be created only once in the application
 
     CROW_ROUTE(crow_app, "/") // What to do when someone visits the root path ("/")
     ([]()                     // Lambda function to handle the request
@@ -24,6 +26,7 @@ int main()
         if (city != nullptr)
         {
             favouritesService.addFavourite(city);
+            favouritesService.addFavouriteToStore(city);
             result["message"] = "Favourite added";
         }
         else
@@ -82,12 +85,18 @@ int main()
         FavouritesService favouritesService;
         crow::json::wvalue result; // JSON object
         std::unordered_set<std::string> favourites = favouritesService.getFavourites();
-        crow::json::wvalue::list favouritesList;
+        std::vector<std::string> favouritesFromStore = favouritesService.getFavouritesFromStore();
+        crow::json::wvalue::list favouritesList, favouritesFromStoreList;
         for (const std::string &city : favourites)
         {
             favouritesList.emplace_back(city);
         }
-        result["favourites"] = std::move(favouritesList);
+        for (const std::string &city : favouritesFromStore)
+        {
+            favouritesFromStoreList.emplace_back(city);
+        }
+        result["favourites"] = std::move(favouritesList); // Move the list instead of copying it
+        result["favouritesFromStore"] = std::move(favouritesFromStoreList); // Move the list instead of copying it
 
         return crow::response(200, result); });
 
