@@ -26,7 +26,7 @@ int main()
         const char *city = req.url_params.get("city"); // It will read the city from /weather?city=London 
         if (city != nullptr)
         {
-            favouritesService.addFavouriteToStore(city);
+            favouritesService.addFavourite(city);
             result["message"] = "Favourite added";
         }
         else
@@ -45,7 +45,7 @@ int main()
         const char *city = req.url_params.get("city"); // It will read the city from /weather?city=London 
         if (city != nullptr)
         {
-            favouritesService.removeFavouriteFromStore(city);
+            favouritesService.removeFavourite(city);
             result["message"] = "Favourite removed";
         }
         else
@@ -64,7 +64,7 @@ int main()
         const char *city = req.url_params.get("city"); // It will read the city from /weather?city=London 
         if (city != nullptr)
         {
-            if (favouritesService.isFavouriteInStore(city))
+            if (favouritesService.isFavourite(city))
             {
                 result["message"] = "Favourite is present";
             }
@@ -85,7 +85,7 @@ int main()
     ([&favouritesService]()
      {
         crow::json::wvalue result; // JSON object
-        std::vector<std::string> favouritesFromStore = favouritesService.getFavouritesFromStore();
+        std::vector<std::string> favouritesFromStore = favouritesService.getFavourites();
         crow::json::wvalue::list favouritesFromStoreList;
         for (const std::string &city : favouritesFromStore)
         {

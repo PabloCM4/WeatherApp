@@ -5,31 +5,31 @@ FavouritesService::FavouritesService()
 {
 }
 
-void FavouritesService::addFavouriteToStore(const std::string &city)
+void FavouritesService::addFavourite(const std::string &city)
 {
     if (city.empty())
     {
         return;
     }
-    favouritesStore_.addFavourite("user1", city);
+    favouritesStore_.addFavouriteToStore("user1", city);
 }
 
-void FavouritesService::removeFavouriteFromStore(const std::string &city)
+void FavouritesService::removeFavourite(const std::string &city)
 {
     if (city.empty())
     {
         return;
     }
-    favouritesStore_.removeFavourite("user1", city);
+    favouritesStore_.removeFavouriteFromStore("user1", city);
     return;
 }
 
-bool FavouritesService::isFavouriteInStore(const std::string &city)
+bool FavouritesService::isFavourite(const std::string &city)
 {
-    return favouritesStore_.isFavourite("user1", city);
+    return favouritesStore_.isFavouriteInStore("user1", city);
 }
 
-std::vector<std::string> FavouritesService::getFavouritesFromStore()
+std::vector<std::string> FavouritesService::getFavourites()
 {
-    return favouritesStore_.getFavourites("user1");
+    return favouritesStore_.getFavouritesFromStore("user1");
 }

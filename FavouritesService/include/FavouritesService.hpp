@@ -5,10 +5,10 @@ class FavouritesService
 {
 public:
     FavouritesService();
-    void addFavouriteToStore(const std::string &city);
-    void removeFavouriteFromStore(const std::string &city);
-    bool isFavouriteInStore(const std::string &city);
-    std::vector<std::string> getFavouritesFromStore();
+    void addFavourite(const std::string &city);
+    void removeFavourite(const std::string &city);
+    bool isFavourite(const std::string &city);
+    std::vector<std::string> getFavourites();
 
 private:
     FavouritesStore favouritesStore_; // Create an instance of FavouriteStore

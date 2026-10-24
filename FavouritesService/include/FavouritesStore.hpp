@@ -8,19 +8,19 @@ public:
     FavouritesStore();
     FavouritesStore(std::string uri, std::string dbName, std::string collectionName);
 
-    void addFavourite(
+    void addFavouriteToStore(
         const std::string &userId,
         const std::string &city);
 
-    void removeFavourite(
+    void removeFavouriteFromStore(
         const std::string &userId,
         const std::string &city);
 
-    bool isFavourite(
+    bool isFavouriteInStore(
         const std::string &userId,
         const std::string &city);
 
-    std::vector<std::string> getFavourites(
+    std::vector<std::string> getFavouritesFromStore(
         const std::string &userId);
 
 private:

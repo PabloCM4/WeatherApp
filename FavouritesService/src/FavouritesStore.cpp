@@ -21,7 +21,7 @@ FavouritesStore::FavouritesStore(std::string uri, std::string dbName, std::strin
 {
 }
 
-void FavouritesStore::addFavourite(
+void FavouritesStore::addFavouriteToStore(
     const std::string &userId,
     const std::string &city)
 {
@@ -41,7 +41,7 @@ void FavouritesStore::addFavourite(
         mongocxx::options::update{}.upsert(true)); // Upsert option is true to create a new document if the user doesn't exist
 }
 
-void FavouritesStore::removeFavourite(
+void FavouritesStore::removeFavouriteFromStore(
     const std::string &userId,
     const std::string &city)
 {
@@ -59,7 +59,7 @@ void FavouritesStore::removeFavourite(
             << finalize);           // Finalize the update operation document
 }
 
-bool FavouritesStore::isFavourite(
+bool FavouritesStore::isFavouriteInStore(
     const std::string &userId,
     const std::string &city)
 {
@@ -90,7 +90,7 @@ bool FavouritesStore::isFavourite(
     return false; // City is not a favourite or user not found
 }
 
-std::vector<std::string> FavouritesStore::getFavourites(
+std::vector<std::string> FavouritesStore::getFavouritesFromStore(
     const std::string &userId)
 {
     // Find the user's document and return their favourites
