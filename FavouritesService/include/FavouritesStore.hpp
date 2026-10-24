@@ -6,12 +6,17 @@ class FavouritesStore
 {
 public:
     FavouritesStore();
+    FavouritesStore(std::string uri, std::string dbName, std::string collectionName);
 
     void addFavourite(
         const std::string &userId,
         const std::string &city);
 
     void removeFavourite(
+        const std::string &userId,
+        const std::string &city);
+
+    bool isFavourite(
         const std::string &userId,
         const std::string &city);
 

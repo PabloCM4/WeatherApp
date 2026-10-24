@@ -1,19 +1,8 @@
 #include "FavouritesService.hpp"
 
-std::unordered_set<std::string> FavouritesService::favouritesSet;
-
 FavouritesService::FavouritesService()
     : favouritesStore_()
 {
-}
-
-void FavouritesService::addFavourite(const std::string &city)
-{
-    if (city.empty())
-    {
-        return;
-    }
-    favouritesSet.insert(city);
 }
 
 void FavouritesService::addFavouriteToStore(const std::string &city)
@@ -25,23 +14,19 @@ void FavouritesService::addFavouriteToStore(const std::string &city)
     favouritesStore_.addFavourite("user1", city);
 }
 
-void FavouritesService::removeFavourite(const std::string &city)
+void FavouritesService::removeFavouriteFromStore(const std::string &city)
 {
-    if (favouritesSet.contains(city))
+    if (city.empty())
     {
-        favouritesSet.erase(city);
+        return;
     }
+    favouritesStore_.removeFavourite("user1", city);
     return;
 }
 
-bool FavouritesService::isFavourite(const std::string &city) const
+bool FavouritesService::isFavouriteInStore(const std::string &city)
 {
-    return favouritesSet.contains(city);
-}
-
-std::unordered_set<std::string> &FavouritesService::getFavourites() const
-{
-    return favouritesSet;
+    return favouritesStore_.isFavourite("user1", city);
 }
 
 std::vector<std::string> FavouritesService::getFavouritesFromStore()
