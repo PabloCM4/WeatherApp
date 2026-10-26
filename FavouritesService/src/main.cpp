@@ -14,7 +14,9 @@ int main()
      {
         crow::json::wvalue result;  // JSON object
         result["status"] = "ok";
-        return crow::response(200, result); });
+        crow::response response(200, result);
+        response.set_header("Access-Control-Allow-Origin", "*");
+        return response; });
 
     CROW_ROUTE(crow_app, "/addFavourite") // What to do when someone visits the path ("/addFavourite")
     //.methods(crow::HTTPMethod::POST) // Specify that this route only accepts POST requests (disabled for testing purposes)
@@ -23,18 +25,24 @@ int main()
         
         crow::json::wvalue result; // JSON object
 
-        const char *city = req.url_params.get("city"); // It will read the city from /weather?city=London 
+        const char *city = req.url_params.get("city"); // It will read the city from /weather?city=London
+        const char *user_param = req.url_params.get("user"); // It will read the user from /weather?user=John
+        const std::string user = user_param != nullptr ? user_param : "";
         if (city != nullptr)
         {
-            favouritesService.addFavourite(city);
+            favouritesService.addFavourite(user, city);
             result["message"] = "Favourite added";
         }
         else
         {
             result["error"] = "City parameter is required";
-            return crow::response(400, result);
+            crow::response response(400, result);
+            response.set_header("Access-Control-Allow-Origin", "*");
+            return response;
         }
-        return crow::response(200, result); });
+        crow::response response(200, result);
+        response.set_header("Access-Control-Allow-Origin", "*");
+        return response; });
 
     CROW_ROUTE(crow_app, "/removeFavourite") // What to do when someone visits the path ("/removeFavourite")
     //.methods(crow::HTTPMethod::DELETE) // Specify that this route only accepts POST requests (disabled for testing purposes)
@@ -42,29 +50,37 @@ int main()
      {
         crow::json::wvalue result; // JSON object
 
-        const char *city = req.url_params.get("city"); // It will read the city from /weather?city=London 
+        const char *city = req.url_params.get("city"); // It will read the city from /weather?city=London
+        const char *user_param = req.url_params.get("user"); // It will read the user from /weather?user=John
+        const std::string user = user_param != nullptr ? user_param : "";
         if (city != nullptr)
         {
-            favouritesService.removeFavourite(city);
+            favouritesService.removeFavourite(user, city);
             result["message"] = "Favourite removed";
         }
         else
         {
             result["error"] = "City parameter is required";
-            return crow::response(400, result);
+            crow::response response(400, result);
+            response.set_header("Access-Control-Allow-Origin", "*");
+            return response;
         }
-        return crow::response(200, result); });
+        crow::response response(200, result);
+        response.set_header("Access-Control-Allow-Origin", "*");
+        return response; });
 
     CROW_ROUTE(crow_app, "/isFavourite") // What to do when someone visits the path ("/isFavourite")
-    .methods(crow::HTTPMethod::GET) // Specify that this route only accepts GET requests
-    ([&favouritesService](const crow::request &req)
-     {
+        .methods(crow::HTTPMethod::GET)  // Specify that this route only accepts GET requests
+        ([&favouritesService](const crow::request &req)
+         {
         crow::json::wvalue result; // JSON object
 
         const char *city = req.url_params.get("city"); // It will read the city from /weather?city=London 
+        const char *user_param = req.url_params.get("user"); // It will read the user from /weather?user=John
+        const std::string user = user_param != nullptr ? user_param : "";
         if (city != nullptr)
         {
-            if (favouritesService.isFavourite(city))
+            if (favouritesService.isFavourite(user, city))
             {
                 result["message"] = "Favourite is present";
             }
@@ -76,16 +92,22 @@ int main()
         else
         {
             result["error"] = "City parameter is required";
-            return crow::response(400, result);
+            crow::response response(400, result);
+            response.set_header("Access-Control-Allow-Origin", "*");
+            return response;
         }
-        return crow::response(200, result); });
+        crow::response response(200, result);
+        response.set_header("Access-Control-Allow-Origin", "*");
+        return response; });
 
     CROW_ROUTE(crow_app, "/getFavourites") // What to do when someone visits the path ("/getFavourites")
-    .methods(crow::HTTPMethod::GET) // Specify that this route only accepts GET requests
-    ([&favouritesService]()
-     {
+        .methods(crow::HTTPMethod::GET)    // Specify that this route only accepts GET requests
+        ([&favouritesService](const crow::request &req)
+         {
         crow::json::wvalue result; // JSON object
-        std::vector<std::string> favouritesFromStore = favouritesService.getFavourites();
+        const char *user_param = req.url_params.get("user"); // It will read the user from /weather?user=John
+        const std::string user = user_param != nullptr ? user_param : "";
+        std::vector<std::string> favouritesFromStore = favouritesService.getFavourites(user);
         crow::json::wvalue::list favouritesFromStoreList;
         for (const std::string &city : favouritesFromStore)
         {
@@ -93,7 +115,9 @@ int main()
         }
         result["favouritesFromStore"] = std::move(favouritesFromStoreList); // Move the list instead of copying it
 
-        return crow::response(200, result); });
+        crow::response response(200, result);
+        response.set_header("Access-Control-Allow-Origin", "*");
+        return response; });
 
     crow_app.port(8081).run();
 }

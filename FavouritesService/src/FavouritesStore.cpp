@@ -31,13 +31,12 @@ void FavouritesStore::addFavouriteToStore(
             << "userId" << userId
             << finalize,
 
-        document{}                  // Second parameter, update operation
-            << "$addToSet"          // Operation: $addToSet (to avoid duplicates)
-            << open_document        // Open a nested document for the update operation (since it is a list of favourites cities)
-            << "favourites" << city // Add the city to the favourites list
-            << close_document       // Close the nested document
-            << finalize,            // Finalize the update operation document
-
+        document{}                                 // Second parameter, update operation
+            << "$addToSet"                         // Operation: $addToSet (to avoid duplicates)
+            << open_document                       // Open a nested document for the update operation (since it is a list of favourites cities)
+            << "favourites" << city                // Add the city to the favourites list
+            << close_document                      // Close the nested document
+            << finalize,                           // Finalize the update operation document
         mongocxx::options::update{}.upsert(true)); // Upsert option is true to create a new document if the user doesn't exist
 }
 

@@ -2,22 +2,32 @@
 #include <array>
 #include <string_view>
 
-struct Weather
+struct WeatherResult
 {
-    std::string city;
-    int temperature;
+    struct Weather
+    {
+        std::string city;
+        int temperature = 0;
+        std::string description = "No description available";
+        int feels_like = 0;
+        int wind_speed = 0;
+    };
+
+    enum class Status
+    {
+        Success,
+        InvalidApiKey,
+        ApiError,
+        JsonParsingError,
+        UnknownError
+    };
+
+    Status status = Status::UnknownError;
+    Weather weather;
 };
 
 class WeatherService
 {
 public:
-    Weather getTemperature(const std::string &city);
-
-private:
-    static constexpr std::array<std::string_view, 5> supportedCities{
-        "Madrid",
-        "Barcelona",
-        "Gothenburg",
-        "London",
-        "Malaga"};
+    WeatherResult getWeather(const std::string &city);
 };

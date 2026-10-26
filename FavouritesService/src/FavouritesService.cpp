@@ -1,35 +1,69 @@
 #include "FavouritesService.hpp"
 
+#define DEFAULT_USER "user1" // Default user if none provided
+
 FavouritesService::FavouritesService()
     : favouritesStore_()
 {
 }
 
-void FavouritesService::addFavourite(const std::string &city)
+void FavouritesService::addFavourite(const std::string &user, const std::string &city)
 {
     if (city.empty())
     {
         return;
     }
-    favouritesStore_.addFavouriteToStore("user1", city);
+    if (user.empty())
+    {
+        favouritesStore_.addFavouriteToStore(DEFAULT_USER, city); // Default user if none provided
+    }
+    else
+    {
+        favouritesStore_.addFavouriteToStore(user, city);
+    }
 }
 
-void FavouritesService::removeFavourite(const std::string &city)
+void FavouritesService::removeFavourite(const std::string &user, const std::string &city)
 {
     if (city.empty())
     {
         return;
     }
-    favouritesStore_.removeFavouriteFromStore("user1", city);
-    return;
+    if (user.empty())
+    {
+        favouritesStore_.removeFavouriteFromStore(DEFAULT_USER, city); // Default user if none provided
+    }
+    else
+    {
+        favouritesStore_.removeFavouriteFromStore(user, city);
+    }
 }
 
-bool FavouritesService::isFavourite(const std::string &city)
+bool FavouritesService::isFavourite(const std::string &user, const std::string &city)
 {
-    return favouritesStore_.isFavouriteInStore("user1", city);
+
+    if (city.empty())
+    {
+        return false;
+    }
+    if (user.empty())
+    {
+        return favouritesStore_.isFavouriteInStore(DEFAULT_USER, city); // Default user if none provided
+    }
+    else
+    {
+        return favouritesStore_.isFavouriteInStore(user, city);
+    }
 }
 
-std::vector<std::string> FavouritesService::getFavourites()
+std::vector<std::string> FavouritesService::getFavourites(const std::string &user)
 {
-    return favouritesStore_.getFavouritesFromStore("user1");
+    if (user.empty())
+    {
+        return favouritesStore_.getFavouritesFromStore(DEFAULT_USER); // Default user if none provided
+    }
+    else
+    {
+        return favouritesStore_.getFavouritesFromStore(user);
+    }
 }

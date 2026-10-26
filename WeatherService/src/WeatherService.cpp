@@ -19,13 +19,9 @@ static size_t writeCallback(
     return totalSize;
 }
 
-Weather WeatherService::getTemperature(const std::string &city)
+WeatherResult WeatherService::getWeather(const std::string &city)
 {
-    // Check if the city is in the list of supported cities
-    if (std::find(supportedCities.begin(), supportedCities.end(), city) == supportedCities.end())
-    {
-        return {city, -999}; // Return a Weather object with temperature -999 to indicate city not found
-    }
+    WeatherResult result;
 
     CURL *curl_obj = curl_easy_init(); // Create a CURL object to make HTTP requests
     const char *apiKey = std::getenv("OPENWEATHER_API_KEY");
@@ -37,11 +33,23 @@ Weather WeatherService::getTemperature(const std::string &city)
         {
             curl_easy_cleanup(curl_obj);
         }
-        return {city, -998};
+        result.status = WeatherResult::Status::InvalidApiKey;
+        return result;
     }
 
-    // Build the URL sent to OpenWeatherMap.
-    std::string url = "https://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=" + std::string(apiKey) + "&units=metric";
+    // Encode the city and country code before building the OpenWeather query.
+    // This will transform spaces into %20, commas into %2C, etc.
+    char *encodedCity = curl_easy_escape(curl_obj, city.c_str(), 0);
+    if (encodedCity == nullptr)
+    {
+        curl_easy_cleanup(curl_obj);
+        result.status = WeatherResult::Status::ApiError;
+        return result;
+    }
+
+    std::string url = "https://api.openweathermap.org/data/2.5/weather?q=" + std::string(encodedCity) + "&appid=" + std::string(apiKey) + "&units=metric";
+    curl_free(encodedCity); // Free the memory allocated by curl_easy_escape to avoid memory leaks
+
     std::string response_string; // Stores the JSON response from the API
 
     // Configure the URL for the HTTP request.
@@ -69,7 +77,8 @@ Weather WeatherService::getTemperature(const std::string &city)
     if (curl_result != CURLE_OK)
     {
         curl_easy_cleanup(curl_obj);
-        return {city, -998}; // Return a Weather object with temperature -998 to indicate an error occurred
+        result.status = WeatherResult::Status::ApiError;
+        return result;
     }
 
     // Parse the response text as a JSON document.
@@ -77,13 +86,28 @@ Weather WeatherService::getTemperature(const std::string &city)
     if (!response_json)
     {
         curl_easy_cleanup(curl_obj);
-        return {city, -997}; // Return a Weather object with temperature -997 to indicate JSON parsing error
+        result.status = WeatherResult::Status::JsonParsingError;
+        return result;
     }
 
-    // OpenWeatherMap places the current temperature at main.temp.
-    // Crow's d() reads that JSON number as a double.
-    const double temperature = response_json["main"]["temp"].d();
+    // Read data using Crow's JSON API.
+    double temperature = response_json["main"]["temp"].d();
+    temperature = std::round(temperature); // Round the temperature to the nearest integer
+
+    double wind_speed = response_json["wind"]["speed"].d();
+    wind_speed = std::round(wind_speed); // Round the wind speed to the nearest integer
+
+    double feels_like = response_json["main"]["feels_like"].d();
+    feels_like = std::round(feels_like); // Round the feels_like temperature to the nearest integer
+
+    result.status = WeatherResult::Status::Success;
+    result.weather.temperature = static_cast<int>(temperature);
+    result.weather.feels_like = static_cast<int>(feels_like);
+    result.weather.wind_speed = static_cast<int>(wind_speed);
+    result.weather.description = response_json["weather"][0]["description"].s();
+    result.weather.city = response_json["name"].s();
 
     curl_easy_cleanup(curl_obj);
-    return {city, static_cast<int>(temperature)};
+
+    return result;
 }
