@@ -5,7 +5,6 @@ project(weather_service)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Crow CONFIG REQUIRED)
 find_package(CURL REQUIRED)
 
 add_executable(weather_service
@@ -13,11 +12,15 @@ add_executable(weather_service
     src/WeatherService.cpp
 )
 
-target_include_directories(weather_service PRIVATE include)
+target_include_directories(
+    weather_service
+    PRIVATE
+        include
+        ../Crow/include #NEEDS CROW CLONED IN ROOT DIRECTORY
+)
 
 target_link_libraries(
     weather_service
     PRIVATE
-        Crow::Crow
         CURL::libcurl
 )

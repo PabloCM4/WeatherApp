@@ -8,7 +8,7 @@ using bsoncxx::builder::stream::document;
 using bsoncxx::builder::stream::finalize;
 using bsoncxx::builder::stream::open_document;
 
-FavouritesStore::FavouritesStore() : client_{mongocxx::uri{"mongodb://localhost:27017"}},
+FavouritesStore::FavouritesStore() : client_{mongocxx::uri{"mongodb://weather-mongo:27017"}},
                                      db_{client_["weather-mongo"]},
                                      users_{db_["users"]}
 {
