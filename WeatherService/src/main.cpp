@@ -1,5 +1,5 @@
 #include <crow.h> // To receive HTTP requests and send responses
-#include "WeatherService.h"
+#include "WeatherService.hpp"
 
 int main()
 {

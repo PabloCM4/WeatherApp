@@ -1,4 +1,4 @@
-#include "WeatherService.h"
+#include "WeatherService.hpp"
 #include <crow.h>      // Provides Crow's JSON parser
 #include <curl/curl.h> // To make HTTP requests
 #include <cstdlib>     // Provides std::getenv
