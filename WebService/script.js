@@ -66,7 +66,7 @@ async function getWeather() {
     try {
 
         const response = await fetch(
-            `http://localhost:8080/weather?city=${encodeURIComponent(city)}`
+            `weather?city=${encodeURIComponent(city)}`
         );
 
         if (!response.ok) {
@@ -107,7 +107,7 @@ async function addFavourite(city) {
     try {
 
         const response = await fetch(
-            `http://localhost:8081/addFavourite?city=${encodeURIComponent(city)}`
+            `/addFavourite?city=${encodeURIComponent(city)}`
         );
 
         if (!response.ok) {
@@ -136,7 +136,7 @@ async function removeFavourite(city) {
     try {
 
         const response = await fetch(
-            `http://localhost:8081/removeFavourite?city=${encodeURIComponent(city)}`
+            `/removeFavourite?city=${encodeURIComponent(city)}`
         );
 
         if (!response.ok) {
@@ -180,7 +180,7 @@ async function loadFavourites() {
     try {
 
         const response = await fetch(
-            "http://localhost:8081/getFavourites"
+            `/getFavourites`
         );
 
         if (!response.ok) {

@@ -10,25 +10,36 @@ RUN apt-get update && apt-get install -y \
     libcurl4-openssl-dev \
     libasio-dev \
     libssl-dev \
+    zip \
+    unzip \
+    git \
     && rm -rf /var/lib/apt/lists/* # Removes the index of the packages to reduce the image size
 
 # Set the working directory
 WORKDIR /app
 
-# Copy the Crow and WeatherService directories into the container
+# Copy the Crow, vcpkg and FavouritesService directories into the container
 COPY Crow ./Crow
-COPY WeatherService ./WeatherService
+COPY vcpkg ./vcpkg
+COPY FavouritesService ./FavouritesService
 
-# Set the working directory to the WeatherService directory to run the commnands
-WORKDIR /app/WeatherService
+# Bootstrap vcpkg
+RUN /app/vcpkg/bootstrap-vcpkg.sh
+
+# Install MongoDB driver
+RUN /app/vcpkg/vcpkg install mongo-cxx-driver
+
+# Set the working directory to the FavouritesService directory to run the commnands
+WORKDIR /app/FavouritesService
 
 # Generate build files
-RUN cmake -B build
+RUN cmake -B build -DCMAKE_TOOLCHAIN_FILE=/app/vcpkg/scripts/buildsystems/vcpkg.cmake
+
 # Build the application (executable)
 RUN cmake --build build
 
 # Expose the port the service will run on
-EXPOSE 8080
+EXPOSE 8081
 
 # Run the executable when the container starts
-CMD ["./build/weather_service"]
+CMD ["./build/favourites_service"]

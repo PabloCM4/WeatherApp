@@ -2,3 +2,4 @@ API_KEY.txt
 .vscode/
 **/build/
 Crow/
+vcpkg/

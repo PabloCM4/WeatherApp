@@ -6,18 +6,21 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
     pkg-config \
-    git \
-    libsasl2-dev \
-    libmongocxx-dev \
-    libbsoncxx-dev
-    && rm -rf /var/lib/apt/lists/*
+    curl \
+    libcurl4-openssl-dev \
+    libasio-dev \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/* # Removes the index of the packages to reduce the image size
 
-# Copy the Crow and FavouritesService directories into the container
+# Set the working directory
+WORKDIR /app
+
+# Copy the Crow and WeatherService directories into the container
 COPY Crow ./Crow
-COPY FavouritesService ./FavouritesService
+COPY WeatherService ./WeatherService
 
-# Set the working directory to the FavouritesService directory to run the commnands
-WORKDIR /app/FavouritesService
+# Set the working directory to the WeatherService directory to run the commnands
+WORKDIR /app/WeatherService
 
 # Generate build files
 RUN cmake -B build
@@ -25,6 +28,6 @@ RUN cmake -B build
 RUN cmake --build build
 
 # Expose the port the service will run on
-EXPOSE 8081
+EXPOSE 8080
 # Run the executable when the container starts
-CMD ["./build/favourites_service"]
+CMD ["./build/weather_service"]
