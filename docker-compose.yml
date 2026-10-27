@@ -1,0 +1,32 @@
+services:
+  web-service:
+    build:
+      context: ./WebService
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - weather-service
+      - favourites-service
+
+  weather-service:
+    build:
+      context: .
+      dockerfile: ./WeatherService/Dockerfile
+    environment:
+      OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY}
+
+  favourites-service:
+    build:
+      context: .
+      dockerfile: ./FavouritesService/Dockerfile
+    depends_on:
+      - weather-mongo
+
+  weather-mongo:
+    image: mongo:latest
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:

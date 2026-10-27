@@ -3,3 +3,4 @@ API_KEY.txt
 **/build/
 Crow/
 vcpkg/
+.env
