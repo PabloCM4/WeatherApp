@@ -344,7 +344,13 @@ It works!
 
 ## 7. Kubernetes
 
-Now moving to Kubernetes. I installed **minikube** in my WSL:
+This was my first time using Kubernetes, so I started with Minikube in WSL.
+The main idea I learned was that Kubernetes runs the containers in Pods and
+uses Services to give them stable names and ports.
+
+### 7.1 Starting Minikube
+
+I installed Minikube and started a local cluster:
 
 ```bash
 curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
@@ -353,7 +359,14 @@ sudo install minikube-linux-amd64 /usr/local/bin/minikube
 minikube start --driver=docker
 ```
 
-Now I created a `WeatherApp.yaml` following the Kubernetes module example and pushed my images into Docker Hub:
+### 7.2 Preparing the images
+
+I created `WeatherApp.yaml` following the Kubernetes module example. The
+manifest describes the web service, weather service, favourites service, and
+MongoDB.
+
+The Kubernetes cluster needs to be able to download my application images, so
+I tagged them and pushed them to Docker Hub:
 
 ```bash
 docker tag weather-service pablosaurio/weather-service:v1
@@ -365,22 +378,127 @@ docker push pablosaurio/favourites-service:v1
 docker push pablosaurio/web-service:v1
 ```
 
-For my API key, as I don't want to upload it to GitHub, I decided to enter it manually, but it can also be stored in a file and passed to the same command pointing to that file:
+### 7.3 Creating the API key Secret
+
+I did not want to put the OpenWeather API key in GitHub or directly in the
+Kubernetes YAML file. Instead, I created a Kubernetes Secret manually:
 
 ```bash
 kubectl create secret generic weather-secret --from-literal=OPENWEATHER_API_KEY=XXXXXXXXXXXXXXX
 ```
 
-Then just:
+The weather Deployment reads this Secret and gives the value to the weather
+container as the `OPENWEATHER_API_KEY` environment variable.
+
+### 7.4 Deploying the application
+
+I applied the manifest with:
 
 ```bash
 kubectl apply -f WeatherApp.yaml
 ```
 
-And to expose the web service to my localhost (outside WSL), I run:
+The web service is a `LoadBalancer` in the manifest. With Minikube, I opened
+it from outside WSL using:
 
 ```bash
 minikube service web-service
 ```
 
-Tested that after doing `kubectl delete -f WeatherApp.yaml` and then the apply again, the favourites were saved.
+To check the application services, I used:
+
+```bash
+kubectl get services
+kubectl get pods
+```
+
+I also tested persistence by deleting and applying the manifest again:
+
+```bash
+kubectl delete -f WeatherApp.yaml
+kubectl apply -f WeatherApp.yaml
+```
+
+The favourites were still saved because MongoDB uses persistent storage in the
+StatefulSet.
+
+## 8. Azure Kubernetes Service
+
+After the local Minikube test, I also tried the same Kubernetes deployment in
+Azure Kubernetes Service (AKS). First I installed the Azure CLI:
+
+```bash
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+```
+
+### 8.1 Creating the Azure resources
+
+I created a resource group. I think of this as a folder for the Azure
+resources:
+
+```bash
+az group create \
+  --name weatherapp-rg \
+  --location belgiumcentral
+```
+
+I registered the container service provider:
+
+```bash
+az provider register --namespace Microsoft.ContainerService
+```
+
+Then I created a small one-node cluster:
+
+```bash
+az aks create \
+  --resource-group weatherapp-rg \
+  --name weatherapp-cluster \
+  --node-count 1 \
+  --node-vm-size Standard_B2s_v2 \
+  --generate-ssh-keys
+```
+
+### 8.2 Starting and stopping the cluster
+
+To save resources when I was not using the cluster, I could stop it:
+
+```bash
+az aks stop \
+  --resource-group weatherapp-rg \
+  --name weatherapp-cluster
+```
+
+I could start it again with:
+
+```bash
+az aks start \
+  --resource-group weatherapp-rg \
+  --name weatherapp-cluster
+```
+
+### 8.3 Connecting kubectl and deploying
+
+I downloaded the cluster credentials so that `kubectl` would use the AKS
+cluster:
+
+```bash
+az aks get-credentials \
+  --resource-group weatherapp-rg \
+  --name weatherapp-cluster
+```
+
+I then created the API key Secret and applied the application manifest:
+
+```bash
+kubectl create secret generic weather-secret \
+  --from-literal=OPENWEATHER_API_KEY=XXXXXXXXXXXXXXX
+
+kubectl apply -f WeatherApp.yaml
+```
+
+Finally, I checked the services to find the external IP of the web service:
+
+```bash
+kubectl get services
+```
