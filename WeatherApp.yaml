@@ -1,0 +1,173 @@
+# Weather Service
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: weather-service
+  labels:
+    app: weather-service
+spec:
+  ports:
+    - port: 8080 # Port that the service will expose
+      targetPort: 8080 # Port that the container is listening on
+  selector:
+    app: weather-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weather-service
+  labels:
+    app: weather-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: weather-service
+  template:
+    metadata:
+      labels:
+        app: weather-service
+    spec:
+      containers:
+      - name: weather-service
+        image: pablosaurio/weather-service:v1
+        ports:
+        - containerPort: 8080 # Port that the container is listening on
+        env:
+        - name: OPENWEATHER_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: weather-secret
+              key: OPENWEATHER_API_KEY
+
+---
+#------------------------#
+
+# Favourites Service
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: favourites-service
+  labels:
+    app: favourites-service
+spec:
+  selector:
+    app: favourites-service
+  ports:
+    - port: 8081 # Port that the service will expose
+      targetPort: 8081 # Port that the container is listening on
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: favourites-service
+  labels:
+    app: favourites-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: favourites-service
+  template:
+    metadata:
+      labels:
+        app: favourites-service
+    spec:
+      containers:
+      - name: favourites-service
+        image: pablosaurio/favourites-service:v1
+        ports:
+        - containerPort: 8081 # Port that the container is listening on
+---
+#------------------------#
+
+# Web Service
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-service
+  labels:
+    app: web-service
+spec:
+  type: LoadBalancer # Type of service that exposes the service externally using a cloud provider's load balancer.
+  selector:
+    app: web-service
+  ports:
+    - port: 80 # Port that the service will expose
+      targetPort: 80 # Port that the container is listening on
+      nodePort: 30000 # Port that will be used to access the service from outside the cluster
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-service
+  labels:
+    app: web-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web-service
+  template:
+    metadata:
+      labels:
+        app: web-service
+    spec:
+      containers:
+      - name: web-service
+        image: pablosaurio/web-service:v1
+        ports:
+        - containerPort: 80 # Port that the container is listening on
+#------------------------#
+---
+# MongoDB Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: weather-mongo
+  labels:
+    app: weather-mongo
+spec:
+  selector:
+    app: weather-mongo
+  ports:
+    - port: 27017 # Port that the service will expose
+      targetPort: 27017 # Port that the container is listening on
+---
+apiVersion: apps/v1
+kind: StatefulSet # StatefulSet is used for applications that require stable, unique network identifiers, persistent storage, and ordered deployment and scaling.
+metadata:
+  name: weather-mongo
+  labels:
+    app: weather-mongo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: weather-mongo
+  template:
+    metadata:
+      labels:
+        app: weather-mongo
+    spec:
+      containers:
+      - name: weather-mongo
+        image: mongo:latest # Using the official MongoDB image from Docker Hub
+        ports:
+        - containerPort: 27017 # Port that the container is listening on
+        volumeMounts:
+        - name: mongo-data
+          mountPath: /data/db
+  volumeClaimTemplates:
+  - metadata:
+      name: mongo-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 100Mi
+---
